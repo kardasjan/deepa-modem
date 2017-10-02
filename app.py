@@ -20,6 +20,7 @@ modem = GsmModem(PORT, 115200)
 modem.smsTextMode = False
 modem.connect(PIN)
 
+print('Connect to MongoDB')
 # Define mongo 
 client = MongoClient()
 db = client.deepa
@@ -35,6 +36,7 @@ def sendSms(msg):
 
 class Send_SMS(Resource):
     def post(self):
+        print('SendSMS: SMS Received')
         # Send SMS to Modem
         msg = request.get_json(silent=False, force=True)
         sms = sendSms(msg)
@@ -50,6 +52,7 @@ class Send_SMS(Resource):
 
 class Process_Queue(Resource):
     def get(self):
+        print('ProcessQueeu: Request initialized')
         messages = db.queue.find({"retries": {"$lt": 4}})
         if messages is None:
             return True
