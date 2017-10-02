@@ -8,22 +8,20 @@ import serial
 import time
 from pymongo import MongoClient
 
-pp = pprint.PrettyPrinter(indent=2)
-
 PORT = '/dev/ttyUSB0'
 BAUDRATE = 115200
 PIN = None
 
 from gsmmodem.modem import GsmModem
 
-pp.pprint('Initializing modem...')
+pprint('Initializing modem...')
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 modem = GsmModem(PORT, 115200)
 modem.smsTextMode = False
 modem.connect(PIN)
 
-pp.pprint('Connect to MongoDB')
+pprint('Connect to MongoDB')
 # Define mongo 
 client = MongoClient()
 db = client.deepa
@@ -34,29 +32,29 @@ api = Api(app)
 def sendSms(msg):
     sms = modem.sendSms(msg['phone'], msg['body'])
     # Now check what SMS contains and define failed message!
-    pp.pprint(sms)
+    pprint(sms)
     return sms
 
 class Send_SMS(Resource):
     def post(self):
-        pp.pprint('SendSMS: SMS Received')
+        pprint('SendSMS: SMS Received')
         # Send SMS to Modem
         msg = request.get_json(silent=False, force=True)
         sms = sendSms(msg)
         pprint(sms)
         msg['retries'] = 0  
         if sms is True:
-            pp.pprint('Message sent!')
+            pprint('Message sent!')
             db.sent.insert_one(msg)
         else:
-            pp.pprint('Errors sending message!')
+            pprint('Errors sending message!')
             # if SMS Error sending
             db.queue.insert_one(msg)
         return msg['body']
 
 class Process_Queue(Resource):
     def get(self):
-        pp.pprint('ProcessQueeu: Request initialized')
+        pprint('ProcessQueeu: Request initialized')
         messages = db.queue.find({"retries": {"$lt": 4}})
         if messages is None:
             return True
@@ -64,11 +62,11 @@ class Process_Queue(Resource):
             sms = sendSms(msg)
             msg['retries'] = msg['retries'] + 1
             if sms is True:
-                pp.pprint('Message sent!')
+                pprint('Message sent!')
                 db.queue.find_one_and_delete({'_id': msg['_id']})
                 db.sent.insert_one(msg)
             else:
-                pp.pprint('Errors sending message!')
+                pprint('Errors sending message!')
                 db.sent.find_one_and_update({'_id': msg['_id']}, {"retries": msg['retries'] + 1})
         return True
  
