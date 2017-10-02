@@ -7,7 +7,7 @@ import serial
 import time
 from pymongo import MongoClient
 
-PORT = '/dev/ttyUSB2'
+PORT = '/dev/ttyUSB0'
 BAUDRATE = 115200
 PIN = None
 
@@ -15,23 +15,23 @@ from gsmmodem.modem import GsmModem
 
 print('Initializing modem...')
 
-#logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
-#modem = GsmModem('/dev/ttyUSB0', 115200)
-#modem.smsTextMode = False
-#modem.connect(PIN)
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
+modem = GsmModem(PORT, 115200)
+modem.smsTextMode = False
+modem.connect(PIN)
 
 # Define mongo 
 client = MongoClient()
-db = client.watch
+db = client.deepa
 
 app = Flask(__name__)
 api = Api(app)
 
 def sendSms(msg):
-    #sms = modem.sendSms(msg['phone'], msg['body'])
+    sms = modem.sendSms(msg['phone'], msg['body'])
     # Now check what SMS contains and define failed message!
-    #return sms
-    return True
+    print(sms)
+    return sms
 
 class Send_SMS(Resource):
     def post(self):
@@ -41,11 +41,11 @@ class Send_SMS(Resource):
         msg['retries'] = msg['retries'] + 1
         if sms is True:
             print('Message sent!')
-            #db.sent.insert_one(msg)
+            db.sent.insert_one(msg)
         else:
             print('Errors sending message!')
             # if SMS Error sending
-            #db.queue.insert_one(msg)
+            db.queue.insert_one(msg)
         return msg['body']
 
 class Process_Queue(Resource):
@@ -58,11 +58,11 @@ class Process_Queue(Resource):
             msg['retries'] = msg['retries'] + 1
             if sms is True:
                 print('Message sent!')
-                #db.queue.find_one_and_delete({'_id': msg['_id']})
-                #db.sent.insert_one(msg)
+                db.queue.find_one_and_delete({'_id': msg['_id']})
+                db.sent.insert_one(msg)
             else:
                 print('Errors sending message!')
-                #db.sent.find_one_and_update({'_id': msg['_id']}, {"retries": msg['retries'] + 1})
+                db.sent.find_one_and_update({'_id': msg['_id']}, {"retries": msg['retries'] + 1})
         return True
  
 api.add_resource(Send_SMS, '/sms')
