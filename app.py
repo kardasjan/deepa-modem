@@ -22,7 +22,7 @@ modem.connect(PIN)
 pprint('Connect to MongoDB')
 # Define mongo 
 client = MongoClient()
-db = client.deepa
+db = client.watch
 
 app = Flask(__name__)
 api = Api(app)
