@@ -3,10 +3,7 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
 from pprint import pprint
-from inspect import getmembers
 import logging
-import serial
-import time
 from pymongo import MongoClient
 
 PORT = '/dev/ttyUSB0'
@@ -38,7 +35,6 @@ def sendSms(msg):
     # sms.status == 0: ENROUTE
     # sms.status == 1: DELIVERED
     # sms.status == 2: FAILED
-    pprint(getmembers(sms))
     return sms
 
 class Send_SMS(Resource):
@@ -48,15 +44,13 @@ class Send_SMS(Resource):
         msg = request.get_json(silent=False, force=True)
         sms = sendSms(msg)
         msg['retries'] = 0  
-        if sms.status == "1":
-            pprint('Message sent!')
-            db.sent.insert_one(msg)
         if sms.status == "2":
             pprint('Errors sending message!')
             # if SMS Error sending
             db.queue.insert_one(msg)
         else:
-            pprint('SMS ENROUTE! Not sent nor failed, yet finished? WTF?')
+            pprint('Message sent!')
+            db.sent.insert_one(msg)
         return msg['body']
 
 class Process_Queue(Resource):
@@ -68,13 +62,13 @@ class Process_Queue(Resource):
         for msg in messages:
             sms = sendSms(msg)
             msg['retries'] = msg['retries'] + 1
-            if sms.status == 1:
+            if sms.status == 2:
+                pprint('Errors sending message!')
+                db.sent.find_one_and_update({'_id': msg['_id']}, {"retries": msg['retries'] + 1})
+            else:
                 pprint('Message sent!')
                 db.queue.find_one_and_delete({'_id': msg['_id']})
                 db.sent.insert_one(msg)
-            else:
-                pprint('Errors sending message!')
-                db.sent.find_one_and_update({'_id': msg['_id']}, {"retries": msg['retries'] + 1})
         return True
  
 api.add_resource(Send_SMS, '/sms')
