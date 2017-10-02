@@ -43,7 +43,8 @@ class Send_SMS(Resource):
         pprint('SendSMS: SMS Received')
         pprint(getmembers(request))
         # Send SMS to Modem
-        msg = request.get_json(silent=False, force=True)
+        msg = request.data.get_json(silent=False, force=True)
+        pprint(getmembers(msg))
         sms = sendSms(msg)
         msg['retries'] = 0  
         if sms.status == "2":
