@@ -14,14 +14,14 @@ PIN = None
 
 from gsmmodem.modem import GsmModem
 
-print('Initializing modem...')
+pprint('Initializing modem...')
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 modem = GsmModem(PORT, 115200)
 modem.smsTextMode = False
 modem.connect(PIN)
 
-print('Connect to MongoDB')
+pprint('Connect to MongoDB')
 # Define mongo 
 client = MongoClient()
 db = client.deepa
@@ -32,7 +32,7 @@ api = Api(app)
 def sendSms(msg):
     sms = modem.sendSms(msg['phone'], msg['body'])
     # Now check what SMS contains and define failed message!
-    print(sms)
+    pprint(sms)
     return sms
 
 class Send_SMS(Resource):
