@@ -65,7 +65,7 @@ class Process_Queue(Resource):
         for msg in messages:
             sms = sendSms(msg)
             msg['retries'] = msg['retries'] + 1
-            if sms is True:
+            if sms.status == 1:
                 pprint('Message sent!')
                 db.queue.find_one_and_delete({'_id': msg['_id']})
                 db.sent.insert_one(msg)
