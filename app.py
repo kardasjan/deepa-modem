@@ -32,7 +32,10 @@ api = Api(app)
 def sendSms(msg):
     sms = modem.sendSms(msg['phone'], msg['body'])
     # Now check what SMS contains and define failed message!
-    pprint(sms)
+    # sms.status == 0: ENROUTE
+    # sms.status == 1: DELIVERED
+    # sms.status == 2: FAILED
+    pprint(sms.status)
     return sms
 
 class Send_SMS(Resource):
@@ -41,15 +44,16 @@ class Send_SMS(Resource):
         # Send SMS to Modem
         msg = request.get_json(silent=False, force=True)
         sms = sendSms(msg)
-        pprint(sms)
         msg['retries'] = 0  
-        if sms is True:
+        if sms.status == "1":
             pprint('Message sent!')
             db.sent.insert_one(msg)
-        else:
+        if sms.status == "2":
             pprint('Errors sending message!')
             # if SMS Error sending
             db.queue.insert_one(msg)
+        else:
+            pprint('SMS ENROUTE! Not sent nor failed, yet finished? WTF?')
         return msg['body']
 
 class Process_Queue(Resource):
