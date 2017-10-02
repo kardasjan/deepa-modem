@@ -38,7 +38,7 @@ def sendSms(msg):
     pprint(sms.status)
     pprint(sms.report)
     pprint(sms.smsc)
-    pprint(sms)
+    dir(sms)
     return sms
 
 class Send_SMS(Resource):
