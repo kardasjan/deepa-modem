@@ -3,6 +3,7 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
 from pprint import pprint
+from inspect import getmembers
 import logging
 import serial
 import time
@@ -37,7 +38,7 @@ def sendSms(msg):
     # sms.status == 0: ENROUTE
     # sms.status == 1: DELIVERED
     # sms.status == 2: FAILED
-    pprint(sms)
+    pprint(getmembers(sms))
     return sms
 
 class Send_SMS(Resource):
