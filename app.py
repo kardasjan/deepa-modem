@@ -2,6 +2,7 @@
 
 from flask import Flask, request
 from flask_restful import Resource, Api
+from pprint import pprint
 import logging
 import serial
 import time
@@ -40,7 +41,8 @@ class Send_SMS(Resource):
         # Send SMS to Modem
         msg = request.get_json(silent=False, force=True)
         sms = sendSms(msg)
-        msg['retries'] = 0
+        pprint(sms)
+        msg['retries'] = 0  
         if sms is True:
             print('Message sent!')
             db.sent.insert_one(msg)
