@@ -72,4 +72,4 @@ api.add_resource(Send_SMS, '/sms')
 api.add_resource(Process_Queue, '/queue')
 
 if __name__ == '__main__':
-    app.run()
+    app.run('0.0.0.0')
