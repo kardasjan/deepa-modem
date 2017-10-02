@@ -40,7 +40,7 @@ class Send_SMS(Resource):
         # Send SMS to Modem
         msg = request.get_json(silent=False, force=True)
         sms = sendSms(msg)
-        msg['retries'] = msg['retries'] + 1
+        msg['retries'] = 0
         if sms is True:
             print('Message sent!')
             db.sent.insert_one(msg)
