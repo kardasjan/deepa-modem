@@ -3,6 +3,7 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
 from pprint import pprint
+from inspect import getmembers
 import logging
 from pymongo import MongoClient
 
@@ -40,6 +41,7 @@ def sendSms(msg):
 class Send_SMS(Resource):
     def post(self):
         pprint('SendSMS: SMS Received')
+        pprint(getmembers(request))
         # Send SMS to Modem
         msg = request.get_json(silent=False, force=True)
         sms = sendSms(msg)
