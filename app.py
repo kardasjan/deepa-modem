@@ -29,16 +29,16 @@ db = client.deepa
 app = Flask(__name__)
 api = Api(app)
 
+
+
 def sendSms(msg):
     sms = modem.sendSms(msg['phone'], msg['body'])
     # Now check what SMS contains and define failed message!
     # sms.status == 0: ENROUTE
     # sms.status == 1: DELIVERED
     # sms.status == 2: FAILED
-    pprint(sms.status)
-    pprint(sms.report)
-    pprint(sms.smsc)
-    dir(sms)
+    attrs = vars(sms)
+    print ', '.join("%s: %s" % item for item in attrs.items())
     return sms
 
 class Send_SMS(Resource):
