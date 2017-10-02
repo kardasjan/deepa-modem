@@ -36,6 +36,9 @@ def sendSms(msg):
     # sms.status == 1: DELIVERED
     # sms.status == 2: FAILED
     pprint(sms.status)
+    pprint(sms.report)
+    pprint(sms.smsc)
+    pprint(sms)
     return sms
 
 class Send_SMS(Resource):
