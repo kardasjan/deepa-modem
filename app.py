@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from flask import Flask, request
+from flask import Flask, request, Response
 from flask_restful import Resource, Api
 from pprint import pprint
 from inspect import getmembers
@@ -31,7 +31,13 @@ api = Api(app)
 
 
 def sendSms(msg):
-    sms = modem.sendSms(msg['phone'], msg['body'])
+    if "body" in msg and "phone" in msg:
+        sms = modem.sendSms(msg["phone"], msg["body"])
+    else:
+        sms = lambda: None
+        sms.status = False
+        sms.body = False
+        sms.phone = False
     # Now check what SMS contains and define failed message!
     # sms.status == 0: ENROUTE
     # sms.status == 1: DELIVERED
@@ -49,12 +55,15 @@ class Send_SMS(Resource):
         msg['retries'] = 0
         if sms.status == "2":
             pprint('Errors sending message!')
-            # if SMS Error sending
             db.queue.insert_one(msg)
-        else:
+            return Response("{'error':'Modem could not send message!'}", status=400, mimetype='application/json')
+        elif sms.status == "0" or sms.status == "1":
             pprint('Message sent!')
             db.sent.insert_one(msg)
-        return msg['body']
+            return Response("{'body':'%s', 'phone':'%s'}" % (msg['body'], msg['phone']), status=200, mimetype='application/json')
+        else:
+            pprint('Message ERROR')
+            return Response("{'error':'Could not parse data!'}", status=400, mimetype='application/json')
 
 class Process_Queue(Resource):
     def get(self):
