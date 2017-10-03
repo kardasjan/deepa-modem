@@ -11,7 +11,7 @@ PORT = '/dev/ttyUSB0'
 BAUDRATE = 115200
 PIN = None
 
-from gsmmodem.modem import GsmModem
+from gsmmodem.modem import GsmModem, CmsError
 
 pprint('Initializing modem...')
 
@@ -34,7 +34,7 @@ def sendSms(msg):
     # status == 0: ENROUTE
     # status == 1: DELIVERED
     # status == 2: FAILED
-    return modem.sendSms(msg["phone"], msg["body"])¨
+    return modem.sendSms(msg["phone"], msg["body"])
 
 class Send_SMS(Resource):
     def post(self):
@@ -50,7 +50,7 @@ class Send_SMS(Resource):
         msg['retries'] = 0
         try:
             sms = sendSms(msg)
-        except CmsError as error
+        except CmsError as error:
             return Response('{"error":"%s"}' % (error.message), status=500, mimetype='application/json')
 
         try:
