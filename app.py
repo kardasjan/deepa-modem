@@ -47,23 +47,21 @@ class Send_SMS(Resource):
         if "phone" not in msg:
             return Response("{'error':'Missing\s phone'}", status=400, mimetype='application/json')
 
-        pprint('Json data in request OK!')
+        msg['retries'] = 0
         sms = sendSms(msg)
 
-        pprint(getmembers(sms))
-        msg['retries'] = 0
-        if sms.status == "2":
-            pprint('Errors sending message!')
-            db.queue.insert_one(msg)
-            return Response("{'error':'Modem could not send message!'}", status=400, mimetype='application/json')
-        elif sms.status == "0" or sms.status == "1":
+        try:
+            if sms.status == "2":
+                raise ValueError("Error sending message!")
             pprint('Message sent!')
             db.sent.insert_one(msg)
-            return Response("{'body':'%s', 'phone':'%s'}" % (msg['body'], msg['phone']), status=200, mimetype='application/json')
-        else:
-            pprint('Message ERROR')
-            return Response("{'error':'Could\s not\s parse\s data!'}", status=400, mimetype='application/json')
-
+            return Response('{"body":"%s", "phone":"%s"}' % (msg["body"], msg["phone"]), status=200, mimetype='application/json')
+        except AttributeError as error:
+            return Response('{"error":"%s"}' % (error.message), status=500, mimetype='application/json')
+        except ValueError as error:
+            db.queue.insert_one(msg)
+            return Response('{"error":"%s"}' % (error.message), status=400, mimetype='application/json') 
+ 
 class Process_Queue(Resource):
     def get(self):
         pprint('ProcessQueeu: Request initialized')
