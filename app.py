@@ -34,7 +34,7 @@ def sendSms(msg):
     # status == 0: ENROUTE
     # status == 1: DELIVERED
     # status == 2: FAILED
-    return modem.sendSms(msg["phone"], msg["body"])
+    return modem.sendSms(msg["phone"], msg["body"])¨
 
 class Send_SMS(Resource):
     def post(self):
@@ -48,8 +48,10 @@ class Send_SMS(Resource):
             return Response('{"error":"Missing phone"}', status=400, mimetype='application/json')
 
         msg['retries'] = 0
-        sms = sendSms(msg)
-        pprint(getmembers(sms))
+        try:
+            sms = sendSms(msg)
+        except CmsError as error
+            return Response('{"error":"%s"}' % (error.message), status=500, mimetype='application/json')
 
         try:
             if sms.status == "2":
