@@ -31,6 +31,7 @@ api = Api(app)
 
 
 def sendSms(msg):
+    pprint(getmembers(msg))
     sms = modem.sendSms(msg['phone'], msg['body'])
     # Now check what SMS contains and define failed message!
     # sms.status == 0: ENROUTE
