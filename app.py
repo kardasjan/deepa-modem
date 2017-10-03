@@ -36,6 +36,12 @@ def sendSms(msg):
     # status == 2: FAILED
     return modem.sendSms(msg["phone"], msg["body"])
 
+def handleCMSError(code):
+    if code == 28:
+        pprint('Restart modem!')
+    else:
+        pprint("Unknown error fix! Code: %s" % (code))
+
 class Send_SMS(Resource):
     def post(self):
         pprint('SendSMS: SMS Received')
@@ -51,6 +57,8 @@ class Send_SMS(Resource):
         try:
             sms = sendSms(msg)
         except CmsError as error:
+            print(error.args)
+            handleCMSError(error.code)
             return Response('{"error":"%s"}' % (error.message), status=500, mimetype='application/json')
 
         try:
