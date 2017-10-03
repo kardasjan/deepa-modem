@@ -4,8 +4,9 @@ from flask import Flask, request, Response
 from flask_restful import Resource, Api
 from pprint import pprint
 from inspect import getmembers
-import logging
 from pymongo import MongoClient
+import logging
+import re
 
 PORT = '/dev/ttyUSB0'
 BAUDRATE = 115200
@@ -52,12 +53,13 @@ class Send_SMS(Resource):
             return Response('{"error":"Missing body"}', status=400, mimetype='application/json')
         if "phone" not in msg:
             return Response('{"error":"Missing phone"}', status=400, mimetype='application/json')
+        if not re.match('^\+420\d{9}$', msg["phone"]):
+            return Response('{"error":"Phone in wrong format!"}', status=400, mimetype='application/json')
 
         msg['retries'] = 0
         try:
             sms = sendSms(msg)
         except CmsError as error:
-            print(error.args)
             handleCMSError(error.code)
             return Response('{"error":"%s"}' % (error.message), status=500, mimetype='application/json')
 
