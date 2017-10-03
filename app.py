@@ -39,7 +39,8 @@ def sendSms(msg):
 
 def handleCMSError(code):
     if code == 28:
-        pprint('Restart modem!')
+        pprint("CMS ERROR %s" % (code))
+        pprint("Modem does not know who you are! Is phone number correct?")
     else:
         pprint("Unknown error fix! Code: %s" % (code))
 
