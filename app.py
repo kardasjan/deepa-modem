@@ -35,7 +35,7 @@ def sendSms(msg):
     # status == 0: ENROUTE
     # status == 1: DELIVERED
     # status == 2: FAILED
-    return modem.sendSms(msg["phone"], msg["body"])
+    return modem.sendSms(msg["phone"], msg["message"])
 
 def handleCMSError(code):
     if code == 28:
@@ -50,8 +50,8 @@ class Send_SMS(Resource):
         # Send SMS to Modem
         msg = request.get_json(silent=False, force=True)
 
-        if "body" not in msg:
-            return Response('{"error":"Missing body"}', status=400, mimetype='application/json')
+        if "message" not in msg:
+            return Response('{"error":"Missing message"}', status=400, mimetype='application/json')
         if "phone" not in msg:
             return Response('{"error":"Missing phone"}', status=400, mimetype='application/json')
         if not re.match('^\+420\d{9}$', msg["phone"]):
@@ -69,7 +69,7 @@ class Send_SMS(Resource):
                 raise ValueError("Error sending message!")
             pprint('Message sent!')
             db.sent.insert_one(msg)
-            return Response('{"body":"%s", "phone":"%s"}' % (msg["body"], msg["phone"]), status=200, mimetype='application/json')
+            return Response('{"message":"%s", "phone":"%s"}' % (msg["message"], msg["phone"]), status=200, mimetype='application/json')
         except AttributeError as error:
             return Response('{"error":"%s"}' % (error.message), status=500, mimetype='application/json')
         except ValueError as error:
