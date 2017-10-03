@@ -49,6 +49,7 @@ class Send_SMS(Resource):
 
         msg['retries'] = 0
         sms = sendSms(msg)
+        pprint(getmembers(sms))
 
         try:
             if sms.status == "2":
