@@ -43,9 +43,9 @@ class Send_SMS(Resource):
         msg = request.get_json(silent=False, force=True)
 
         if "body" not in msg:
-            return Response("{'error':'Missing\s body'}", status=400, mimetype='application/json')
+            return Response('{"error":"Missing body"}', status=400, mimetype='application/json')
         if "phone" not in msg:
-            return Response("{'error':'Missing\s phone'}", status=400, mimetype='application/json')
+            return Response('{"error":"Missing phone"}', status=400, mimetype='application/json')
 
         msg['retries'] = 0
         sms = sendSms(msg)
