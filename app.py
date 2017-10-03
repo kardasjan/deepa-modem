@@ -51,10 +51,13 @@ class Send_SMS(Resource):
         msg = request.get_json(silent=False, force=True)
 
         if "message" not in msg:
+            pprint("RequestValid: Missing message!")
             return Response('{"error":"Missing message"}', status=400, mimetype='application/json')
         if "phone" not in msg:
+            pprint("RequestValid: Missing phone!")
             return Response('{"error":"Missing phone"}', status=400, mimetype='application/json')
         if not re.match('^\+420\d{9}$', msg["phone"]):
+            pprint("RequestValid: Phone in wrong format!")
             return Response('{"error":"Phone in wrong format!"}', status=400, mimetype='application/json')
 
         msg['retries'] = 0
@@ -62,18 +65,21 @@ class Send_SMS(Resource):
             sms = sendSms(msg)
         except CmsError as error:
             handleCMSError(error.code)
+            pprint(error.message)
             return Response('{"error":"%s"}' % (error.message), status=500, mimetype='application/json')
 
         try:
             if sms.status == "2":
                 raise ValueError("Error sending message!")
-            pprint('Message sent!')
             db.sent.insert_one(msg)
+            pprint("message: %s \nphone: %s" % (msg["message"], msg["phone"]))
             return Response('{"message":"%s", "phone":"%s"}' % (msg["message"], msg["phone"]), status=200, mimetype='application/json')
         except AttributeError as error:
+            pprint(error.message)
             return Response('{"error":"%s"}' % (error.message), status=500, mimetype='application/json')
         except ValueError as error:
             db.queue.insert_one(msg)
+            pprint(error.message)
             return Response('{"error":"%s"}' % (error.message), status=400, mimetype='application/json') 
  
 class Process_Queue(Resource):
