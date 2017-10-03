@@ -50,6 +50,7 @@ class Send_SMS(Resource):
         pprint('Json data in request OK!')
         sms = sendSms(msg)
 
+        pprint(getmembers(sms))
         msg['retries'] = 0
         if sms.status == "2":
             pprint('Errors sending message!')
